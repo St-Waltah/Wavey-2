@@ -1,15 +1,17 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 
-
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 2560,
-    height: 1440,
+    width: 1280,
+    height: 720,
+    minHeight: 800,
+    minWidth: 600,
+    frame: true,
     backgroundColor: '#000000',
     show: false,
     autoHideMenuBar: true,
@@ -19,6 +21,8 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  mainWindow.maximize();
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
