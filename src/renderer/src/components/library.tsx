@@ -29,6 +29,14 @@ export default function Library() {
   const [searchQuery, setSearchQuery] = useState('');
 
 
+  const [isOpenInstruments, setIsOpenInstruments] = useState(false);
+  const [isOpenGenre, setIsOpenGenre] = useState(false);
+  const [isOpenLanguage, setIsOpenLanguage] = useState(false);
+  const [selectedInstrument, setSelectedInstrument] = useState('Instruments');
+  const [selectedGenre, setSelectedGenre] = useState('My everything');
+  const [selectedLanguage, setSelectedLanguage] = useState('Any');
+
+
   const filteredSongs = mockSongs.filter((song) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -121,7 +129,7 @@ export default function Library() {
             console.log("Статус изменен на:", !isOnline ? "Online" : "Offline");
           }}
           className={`
-            ${elementStyle} 
+            ${elementStyle}
             h-full
             aspect-square
             rounded-full! 
@@ -129,6 +137,9 @@ export default function Library() {
             transition-all
             duration-500
             focus:outline-none
+            flex
+            items-center
+            justify-center
             ${isOnline
               ? 'bg-[#FFC7FF]/15 border-[#FFC7FF] shadow-[0_0_20px_rgba(255,199,255,0.6),inset_0_0_12px_rgba(255,199,255,0.4)]'
               : 'bg-[#06003E]/50 border-[#FFC7FF]/20 shadow-none'
@@ -138,12 +149,13 @@ export default function Library() {
         >
           <OnlineIcon
             className={`
-              w-[75%] h-[75%] 
+              w-[65%] h-[65%] 
               fill-current stroke-current 
               transition-all 
-              duration-1000
+              duration-800
+              translate-x-[3.5%]
               ${isOnline
-                ? 'text-[#FFC7FF] filter:drop-shadow(0_0_10px_rgba(255,199,255,1))_drop-shadow(0_0_25px_rgba(255,199,255,0.6))] scale-105'
+                ? 'text-[#FFC7FF] filter:drop-shadow(0_0_10px_rgba(255,199,255,1))_drop-shadow(0_0_25px_rgba(255,199,255,0.6))] scale-130'
                 : 'text-[#FFC7FF]/30 filter-none scale-100'
               }
             `}
@@ -159,67 +171,97 @@ export default function Library() {
       {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
       {/* ---------------------------------------------------------------------------------------------------------------- */}
 
-      <div className="flex-1 w-full overflow-y-auto flex flex-col custom-scrollbar gap-2">
-        {filteredSongs.map((song) => (
-          <div
-            key={song.id}
-            className="
-            w-full shrink-0
-            box-border
-            px-2
-            py-2
-            grid grid-cols-[72px_1fr_48px_48px_auto]
-            items-center
-            select-none
-            gap-3
-            hover:bg-[#FFC7FF]/20
-            rounded-3xl
-            transition-colors
-            duration-400
-          "
-          >
-            {/* 1. Квадратная обложка с закруглением */}
-            <div className="w-18 h-18 bg-[#1e1e1e] rounded-3xl overflow-hidden shrink-0">
-              <img
-                src="../../../../resources/white.png"
-                alt="Cover"
-                className="w-full h-full object-cover"
-              />
-            </div>
+      {/* СПИСОК ПЕСЕН С ВИРТУАЛИЗАЦИЕЙ */}
+      <div
+        ref={parentRef}
+        className="flex-1 w-full overflow-y-auto custom-scrollbar relative"
+      >
+        {/* Внутренний контейнер, который создает иллюзию полной высоты скролла */}
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {/* Рендерим ТОЛЬКО те элементы, которые сейчас видны в окне Electron */}
+          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+            const song = filteredSongs[virtualItem.index];
 
-            {/* 2. Блок текстов: Название (крупное) и Автор (мелкий под ним) */}
-            <div className="flex flex-col text-left justify-center pl-1 min-w-0">
-              <span className="text-[#FFC7FF] font-bold tracking-wide neon-text-glow text-[22px] truncate">
-                {song.title}
-              </span>
-              <span className="text-[#FFC7FF]/60 text-[16px] leading-tight font-semibold truncate mt-1">
-                {song.artist}
-              </span>
-            </div>
+            return (
+              <div
+                key={virtualItem.key}
+                data-index={virtualItem.index}
+                ref={rowVirtualizer.measureElement}
+                className="
+                  w-full shrink-0
+                  box-border
+                  px-2
+                  py-2
+                  grid grid-cols-[72px_1fr_48px_48px_auto]
+                  items-center
+                  select-none
+                  gap-3
+                  hover:bg-[#FFC7FF]/20
+                  rounded-3xl
+                  transition-colors
+                  duration-400
+                "
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualItem.start}px)`, // Сдвигаем карточку на её законное место
+                }}
+              >
+                {/* 1. Квадратная обложка с закруглением */}
+                <div className="w-18 h-18 bg-[#1e1e1e] rounded-3xl overflow-hidden shrink-0">
+                  <img
+                    src="../../../../resources/white.png"
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-            {/* 3. Статус on / off в оригинальном стиле */}
-            <div className="w-full h-12 flex items-center justify-center text-[#FFC7FF] neon-text-glow font-medium text-[20px]">
-              <OnlineIcon className="w-6 h-6 text-[#FFC7FF] drop-shadow-[0_0_8px_rgba(255,199,255,0.8)]" />
-            </div>
+                {/* 2. Блок текстов: Название (крупное) и Автор (мелкий под ним) */}
+                <div className="flex flex-col text-left justify-center pl-1 min-w-0">
+                  <span className="text-[#FFC7FF] font-bold tracking-wide neon-text-glow text-[22px] truncate">
+                    {song.title}
+                  </span>
+                  <span className="text-[#FFC7FF]/60 text-[16px] leading-tight font-semibold truncate mt-1">
+                    {song.artist}
+                  </span>
+                </div>
 
+                {/* 3. Статус on / off в оригинальном стиле */}
+                <div className="w-full h-12 flex items-center justify-center text-[#FFC7FF] neon-text-glow font-medium text-[20px]">
+                  <OnlineIcon className="w-6 h-6 text-[#FFC7FF] drop-shadow-[0_0_8px_rgba(255,199,255,0.8)]" />
+                </div>
 
-            {/* 5. Кнопка плюс (тонкий аккуратный кастомный плюс) */}
-            <div className="w-full h-12 flex items-center justify-center">
-              <button className="w-12 h-12 text-[#FFC7FF] text-[32px] font-light cursor-pointer flex items-center justify-center pb-1.5 leading-none">
-                +
-              </button>
-            </div>
+                {/* 5. Кнопка плюс (тонкий аккуратный кастомный плюс) */}
+                <div className="w-full h-12 flex items-center justify-center">
+                  <button className="w-12 h-12 text-[#FFC7FF] text-[32px] font-light cursor-pointer flex items-center justify-center pb-1.5 leading-none">
+                    +
+                  </button>
+                </div>
 
-            {/* 6. Время трека с неоновым свечением */}
-            <div className="text-[#FFC7FF] neon-text-glow font-bold text-[22px] text-right font-mono tracking-tighter">
-              {song.duration}
-            </div>
-          </div>))}
+                {/* 6. Время трека с неоновым свечением */}
+                <div className="text-[#FFC7FF] neon-text-glow font-bold text-[22px] text-right font-mono tracking-tighter">
+                  {song.duration}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
+        {/* Подсказка по центру контейнера, если поиск ничего не выдал */}
         {filteredSongs.length === 0 && (
-          <div className="text-white/40 text-center py-8 text-[20px]">
+          <div className="absolute inset-0 flex items-center justify-center text-white/40 text-[20px] pointer-events-none">
             No songs found
-          </div>)}
+          </div>
+        )}
       </div>
-    </div >)
+    </div>
+  )
 }
