@@ -1,3 +1,14 @@
+import { useState, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+
+
+
+import OnlineIcon from '../icons/Online.svg?react';
+
+
+
+
 // ЗАГЛУШКИ ПЕСЕН
 const mockSongs = Array.from({ length: 600 }, (_, index) => ({
   id: index + 1,
@@ -13,6 +24,29 @@ const mockSongs = Array.from({ length: 600 }, (_, index) => ({
 export default function Library() {
   // Общие стили: рамка inside, цвета, скругление и центрирование текста
   const elementStyle = "bg-[#06003E]/50 border border-[#FFC7FF]/100 rounded-[30px] box-border text-white flex items-center justify-center select-none text-center px-2 antialiased bg-clip-padding";
+
+  const [isOnline, setIsOnline] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+
+  const filteredSongs = mockSongs.filter((song) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      song.title.toLowerCase().includes(query) ||
+      song.artist.toLowerCase().includes(query)
+    );
+  });
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filteredSongs.length, // Сколько всего элементов в текущем списке
+    getScrollElement: () => parentRef.current, // Элемент, который скроллится
+    estimateSize: () => 88, // Примерная высота одной строчки трека в пикселях (72px картинка + отступы)
+    overscan: 5, // Сколько карточек сверху и снизу экрана держать в памяти про запас для плавной прокрутки
+  });
+
+
   return (
     <div
       className="
@@ -60,21 +94,73 @@ export default function Library() {
       {/* ПОИСК ОНЛАЙН И ОФФЛАЙН */}
       <div className="w-full h-[8%] flex justify-between gap-[1.5%] portrait:h-20 portrait:text-[30px]">
         {/* SEARCH */}
-        <div className={`${elementStyle} text-white/30`} style={{ width: '90%' }}>
-          Search
-        </div>
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={`
+            ${elementStyle} 
+            placeholder:text-white/80
+            focus:outline-none 
+            focus:border-[#FFC7FF] 
+            focus:shadow-[0_0_15px_rgba(255,199,255,0.3)]
+            transition-all
+            duration-1000
+            text-left
+            px-6
+          `}
+          style={{ width: '90%' }}
+        />
 
         {/* ONLINE/OFFLINE */}
-        <div className={elementStyle} style={{ width: '10%' }}>
-          On
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setIsOnline(!isOnline);
+            console.log("Статус изменен на:", !isOnline ? "Online" : "Offline");
+          }}
+          className={`
+            ${elementStyle} 
+            h-full
+            aspect-square
+            rounded-full! 
+            cursor-pointer
+            transition-all
+            duration-500
+            focus:outline-none
+            ${isOnline
+              ? 'bg-[#FFC7FF]/15 border-[#FFC7FF] shadow-[0_0_20px_rgba(255,199,255,0.6),inset_0_0_12px_rgba(255,199,255,0.4)]'
+              : 'bg-[#06003E]/50 border-[#FFC7FF]/20 shadow-none'
+            }
+          `}
+          style={{ width: 'auto' }}
+        >
+          <OnlineIcon
+            className={`
+              w-[75%] h-[75%] 
+              fill-current stroke-current 
+              transition-all 
+              duration-1000
+              ${isOnline
+                ? 'text-[#FFC7FF] filter:drop-shadow(0_0_10px_rgba(255,199,255,1))_drop-shadow(0_0_25px_rgba(255,199,255,0.6))] scale-105'
+                : 'text-[#FFC7FF]/30 filter-none scale-100'
+              }
+            `}
+          />
+        </button>
       </div>
 
-      {/* Ниже пойдет остальной контент библиотеки */}
 
-      {/* СПИСОК ПЕСЕН */}
+      {/* ---------------------------------------------------------------------------------------------------------------- */}
+      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
+      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
+      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
+      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
+      {/* ---------------------------------------------------------------------------------------------------------------- */}
+
       <div className="flex-1 w-full overflow-y-auto flex flex-col custom-scrollbar gap-2">
-        {mockSongs.map((song) => (
+        {filteredSongs.map((song) => (
           <div
             key={song.id}
             className="
@@ -113,7 +199,7 @@ export default function Library() {
 
             {/* 3. Статус on / off в оригинальном стиле */}
             <div className="w-full h-12 flex items-center justify-center text-[#FFC7FF] neon-text-glow font-medium text-[20px]">
-              {song.status}
+              <OnlineIcon className="w-6 h-6 text-[#FFC7FF] drop-shadow-[0_0_8px_rgba(255,199,255,0.8)]" />
             </div>
 
 
@@ -129,6 +215,11 @@ export default function Library() {
               {song.duration}
             </div>
           </div>))}
+
+        {filteredSongs.length === 0 && (
+          <div className="text-white/40 text-center py-8 text-[20px]">
+            No songs found
+          </div>)}
       </div>
     </div >)
 }
