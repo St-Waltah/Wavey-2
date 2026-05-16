@@ -2,11 +2,11 @@ import Library from './components/library';
 
 function App(): React.JSX.Element {
   return (
-    <div className="w-screen h-screen overflow-hidden bg-black text-white select-none antialiased flex">
-      <div className="relative h-full w-1/2 portrait:w-full">
+    <div className="w-screen h-screen overflow-hidden bg-black text-white select-none antialiased flex flex-wrap">
+      <div className="flex-1 min-w-112.5 h-full relative flex items-center justify-center">
         <Library />
       </div>
-      <div className="w-1/2 h-full portrait:hidden">
+      <div className="flex-1 min-w-125 h-full max-[1050px]:hidden bg-[#0c0c0c] border-l border-[#FFC7FF]/10">
 
       </div>
     </div>

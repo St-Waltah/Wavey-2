@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-.neon-text-glow {
-  text-shadow: 0 0 5px rgba(255, 199, 255, 0.6), 0 0 10px rgba(255, 199, 255, 0.4);
-}
-
-
 /* Полностью скрываем полосу прокрутки для Chromium/Electron, сохраняя саму возможность прокрутки */
 .custom-scrollbar::-webkit-scrollbar {
   display: none !important;
