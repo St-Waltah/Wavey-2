@@ -6,7 +6,7 @@ function App(): React.JSX.Element {
       <div className="flex-1 min-w-112.5 h-full relative flex items-center justify-center">
         <Library />
       </div>
-      <div className="flex-1 min-w-125 h-full max-[1050px]:hidden bg-[#0c0c0c] border-l border-[#FFC7FF]/10">
+      <div className="flex-1 min-w-125 h-full max-[1100px]:hidden border-l border-[#FFC7FF]/10">
 
       </div>
     </div>
