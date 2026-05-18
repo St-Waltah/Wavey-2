@@ -1,12 +1,9 @@
-import { useState, useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useState } from 'react';
 
-
-
-
-import OnlineIcon from '../icons/Online.svg?react';
-
-
+import OnlineToggle from './sub_components/OnlineToggle';
+import Filters, { GENRES_MAP } from './sub_components/Filters';
+import SearchInput from './sub_components/SearchInput';
+import SongList from './sub_components/SongList';
 
 
 // ЗАГЛУШКИ ПЕСЕН
@@ -19,52 +16,28 @@ const mockSongs = Array.from({ length: 600 }, (_, index) => ({
 }));
 
 
-
-
-const GENRES_MAP = {
-  Instruments: ['Modern', 'Moder SD', 'Vinyl', 'Vinyl SD'],
-  Songs: [
-    'Country', 'Dark rave', 'Depression & Obsession', 'Great Acoustic Songs',
-    'Huh', 'Jazz & Blues', 'My everything', 'Pop', 'Rap', 'Rock',
-    'Romantic Collection', 'Vinyl Collection'
-  ]
-};
-const LANGUAGES = ['Any', 'En', 'Ru'];
-
-
-
-
 export default function Library() {
-  // Общие стили: рамка inside, цвета, скругление и центрирование текста
-  const elementStyle = "bg-[#06003E]/50 border border-[#FFC7FF]/100 rounded-[30px] box-border text-white flex items-center justify-center select-none text-center px-2 antialiased bg-clip-padding";
 
-  const [isOnline, setIsOnline] = useState(true);
+  {/* ---------------------------- */ }
+  {/* СОСТОЯНИЯ */ } {/* СОСТОЯНИЯ */ }
+  {/* ---------------------------- */ }
+
+  const [isOnline, setIsOnline] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-
-  const [isOpenInstruments, setIsOpenInstruments] = useState(false);
-  const [isOpenGenre, setIsOpenGenre] = useState(false);
-  const [isOpenLanguage, setIsOpenLanguage] = useState(false);
   const [selectedInstrument, setSelectedInstrument] = useState<string>('Songs');
   const [selectedGenre, setSelectedGenre] = useState<string>(GENRES_MAP['Songs'][0]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('Any');
 
-
+  {/* ------------------------- */ }
+  {/* ФИЛЬТР */ } {/* ФИЛЬТР */ }
+  {/* ------------------------- */ }
   const filteredSongs = mockSongs.filter((song) => {
     const query = searchQuery.toLowerCase();
     return (
       song.title.toLowerCase().includes(query) ||
       song.artist.toLowerCase().includes(query)
     );
-  });
-
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: filteredSongs.length, // Сколько всего элементов в текущем списке
-    getScrollElement: () => parentRef.current, // Элемент, который скроллится
-    estimateSize: () => 88, // Примерная высота одной строчки трека в пикселях (72px картинка + отступы)
-    overscan: 5, // Сколько карточек сверху и снизу экрана держать в памяти про запас для плавной прокрутки
   });
 
 
@@ -94,270 +67,34 @@ export default function Library() {
         fontSize: 'clamp(18px, 1.4vw, 30px)'
       }}
     >
-      {/* ВЫПАДАЮЩИЕ  СПИСКИ */}
-      <div className="w-full h-[10%] flex justify-between gap-[1.5%] portrait:h-25 portrait:text-[30px] relative z-50">
 
-        {/* INSTR/SONG */}
-        <div className="relative h-full" style={{ width: '40%' }}>
-          <div className={`${elementStyle} h-full cursor-pointer hover:bg-[#06003E]/80 transition-colors`}
-            onClick={() => {
-              setIsOpenInstruments(!isOpenInstruments);
-              setIsOpenGenre(false);
-              setIsOpenLanguage(false);
-            }}
-          >
-            {selectedInstrument}
-          </div>
-
-          {isOpenInstruments && (
-            <div className="absolute top-[115%] left-0 w-full bg-[#06003E]/95 border border-[#FFC7FF] rounded-[20px] shadow-[0_0_20px_rgba(255,199,255,0.2)] overflow-hidden flex flex-col z-50 backdrop-blur-md">
-              {['Instruments', 'Songs'].map((item) => (
-                <div
-                  key={item}
-                  className="px-6 py-3 text-white hover:bg-[#FFC7FF]/20 cursor-pointer transition-colors text-left"
-                  onClick={() => {
-                    setSelectedInstrument(item);
-                    const genres = GENRES_MAP[item as keyof typeof GENRES_MAP];
-                    setSelectedGenre(genres[0]);
-                    setIsOpenInstruments(false);
-                    setIsOpenInstruments(false);
-                  }}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* GENRE */}
-        <div className="relative h-full" style={{ width: '40%' }}>
-          <div
-            className={`${elementStyle} h-full cursor-pointer hover:bg-[#06003E]/80 transition-colors`}
-            onClick={() => {
-              setIsOpenGenre(!isOpenGenre);
-              setIsOpenInstruments(false);
-              setIsOpenLanguage(false);
-            }}
-          >
-            {selectedGenre}
-          </div>
-
-          {isOpenGenre && (
-            <div
-              className="absolute top-[115%] left-0 w-full bg-[#06003E]/95 border border-[#FFC7FF] rounded-[20px] shadow-[0_0_30px_rgba(255,199,255,0.3)] max-h-100 overflow-y-auto custom-scrollbar flex flex-col z-50 backdrop-blur-md transition-all duration-200 animate-in fade-in zoom-in-95 scroll-py-2">
-              {GENRES_MAP[selectedInstrument as keyof typeof GENRES_MAP].map((genre) => (
-                <div
-                  key={genre}
-                  className="block w-full shrink-0 px-5 py-3 text-white hover:bg-[#FFC7FF]/20 cursor-pointer transition-colors text-left truncate leading-normal"
-                  onClick={() => {
-                    setSelectedGenre(genre);
-                    setIsOpenGenre(false);
-                  }}
-                >
-                  {genre}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* LANGUAGE */}
-        <div className="relative h-full" style={{ width: '20%' }}>
-          <div
-            className={`${elementStyle} h-full cursor-pointer hover:bg-[#06003E]/80 transition-colors`}
-            onClick={() => {
-              setIsOpenLanguage(!isOpenLanguage);
-              setIsOpenInstruments(false);
-              setIsOpenGenre(false);
-            }}
-          >
-            {selectedLanguage}
-          </div>
-
-          {isOpenLanguage && (
-            <div className="absolute top-[115%] left-0 w-full bg-[#06003E]/95 border border-[#FFC7FF] rounded-[20px] shadow-[0_0_20px_rgba(255,199,255,0.2)] overflow-hidden flex flex-col z-50 backdrop-blur-md">
-              {LANGUAGES.map((lang) => (
-                <div
-                  key={lang}
-                  className="px-6 py-3 text-white hover:bg-[#FFC7FF]/20 cursor-pointer transition-colors text-left"
-                  onClick={() => {
-                    setSelectedLanguage(lang);
-                    setIsOpenLanguage(false);
-                  }}
-                >
-                  {lang}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      {/* ------------------------- */}
+      {/* ФИЛЬТРЫ */}{/* ФИЛЬТРЫ */}
+      {/* ------------------------- */}
+      <Filters
+        selectedInstrument={selectedInstrument}
+        setSelectedInstrument={setSelectedInstrument}
+        selectedGenre={selectedGenre}
+        setSelectedGenre={setSelectedGenre}
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+      />
 
 
+      {/* ------------------------- */}
       {/* ПОИСК ОНЛАЙН И ОФФЛАЙН */}
+      {/* ------------------------- */}
       <div className="w-full h-[8%] flex justify-between gap-[1.5%] portrait:h-20 portrait:text-[30px]">
-        {/* SEARCH */}
-        <input
-          type="text"
-          placeholder="Search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={`
-            ${elementStyle} 
-            placeholder:text-white/80
-            focus:outline-none 
-            focus:border-[#FFC7FF] 
-            focus:shadow-[0_0_15px_rgba(255,199,255,0.3)]
-            transition-all
-            duration-1000
-            text-left
-            px-6
-          `}
-          style={{ width: '90%' }}
-        />
-
-        {/* ONLINE/OFFLINE */}
-        <button
-          type="button"
-          onClick={() => {
-            setIsOnline(!isOnline);
-            console.log("Статус изменен на:", !isOnline ? "Online" : "Offline");
-          }}
-          className={`
-            ${elementStyle}
-            h-full
-            aspect-square
-            rounded-full! 
-            cursor-pointer
-            transition-all
-            duration-500
-            focus:outline-none
-            flex
-            items-center
-            justify-center
-            ${isOnline
-              ? 'bg-[#FFC7FF]/15 border-[#FFC7FF] shadow-[0_0_20px_rgba(255,199,255,0.6),inset_0_0_12px_rgba(255,199,255,0.4)]'
-              : 'bg-[#06003E]/50 border-[#FFC7FF]/20 shadow-none'
-            }
-          `}
-          style={{ width: 'auto' }}
-        >
-          <OnlineIcon
-            className={`
-              w-[65%] h-[65%] 
-              fill-current stroke-current 
-              transition-all 
-              duration-800
-              translate-x-[3.5%]
-              ${isOnline
-                ? 'text-[#FFC7FF] filter:drop-shadow(0_0_10px_rgba(255,199,255,1))_drop-shadow(0_0_25px_rgba(255,199,255,0.6))] scale-130'
-                : 'text-[#FFC7FF]/30 filter-none scale-100'
-              }
-            `}
-          />
-        </button>
+        <SearchInput value={searchQuery} onChange={setSearchQuery} />
+        <OnlineToggle isOnline={isOnline} onChange={setIsOnline} />
       </div>
 
 
       {/* ---------------------------------------------------------------------------------------------------------------- */}
       {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
-      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
-      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
-      {/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}{/* СПИСОК ПЕСЕН */}
       {/* ---------------------------------------------------------------------------------------------------------------- */}
+      <SongList filteredSongs={filteredSongs} />
 
-      {/* СПИСОК ПЕСЕН С ВИРТУАЛИЗАЦИЕЙ */}
-      <div
-        ref={parentRef}
-        className="flex-1 w-full overflow-y-auto custom-scrollbar relative"
-      >
-        {/* Внутренний контейнер, который создает иллюзию полной высоты скролла */}
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            width: '100%',
-            position: 'relative',
-          }}
-        >
-          {/* Рендерим ТОЛЬКО те элементы, которые сейчас видны в окне Electron */}
-          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-            const song = filteredSongs[virtualItem.index];
-
-            return (
-              <div
-                key={virtualItem.key}
-                data-index={virtualItem.index}
-                ref={rowVirtualizer.measureElement}
-                className="
-                  w-full shrink-0
-                  box-border
-                  px-2
-                  py-2
-                  grid grid-cols-[72px_1fr_48px_48px_auto]
-                  items-center
-                  select-none
-                  gap-3
-                  hover:bg-[#FFC7FF]/20
-                  rounded-3xl
-                  transition-colors
-                  duration-400
-                "
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  transform: `translateY(${virtualItem.start}px)`, // Сдвигаем карточку на её законное место
-                }}
-              >
-                {/* 1. Квадратная обложка с закруглением */}
-                <div className="w-18 h-18 bg-[#1e1e1e] rounded-3xl overflow-hidden shrink-0">
-                  <img
-                    src="../../../../resources/white.png"
-                    alt="Cover"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* 2. Блок текстов: Название (крупное) и Автор (мелкий под ним) */}
-                <div className="flex flex-col text-left justify-center pl-1 min-w-0">
-                  <span className="text-[#FFC7FF] font-bold tracking-wide neon-text-glow text-[22px] truncate">
-                    {song.title}
-                  </span>
-                  <span className="text-[#FFC7FF]/60 text-[16px] leading-tight font-semibold truncate mt-1">
-                    {song.artist}
-                  </span>
-                </div>
-
-                {/* 3. Статус on / off в оригинальном стиле */}
-                <div className="w-full h-12 flex items-center justify-center text-[#FFC7FF] neon-text-glow font-medium text-[20px]">
-                  <OnlineIcon className="w-6 h-6 text-[#FFC7FF] drop-shadow-[0_0_8px_rgba(255,199,255,0.8)]" />
-                </div>
-
-                {/* 5. Кнопка плюс (тонкий аккуратный кастомный плюс) */}
-                <div className="w-full h-12 flex items-center justify-center">
-                  <button className="w-12 h-12 text-[#FFC7FF] text-[32px] font-light cursor-pointer flex items-center justify-center pb-1.5 leading-none">
-                    +
-                  </button>
-                </div>
-
-                {/* 6. Время трека с неоновым свечением */}
-                <div className="text-[#FFC7FF] neon-text-glow font-bold text-[22px] text-right font-mono tracking-tighter">
-                  {song.duration}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Подсказка по центру контейнера, если поиск ничего не выдал */}
-        {filteredSongs.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-white/40 text-[20px] pointer-events-none">
-            No songs found
-          </div>
-        )}
-      </div>
     </div>
   )
 }
